@@ -1,10 +1,5 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>welcome</title>
-  </head>
+{% extends "base.html" %}
 
-  <body>
-    <h2>Welcome, {{username}}!</h2>
-  </body>
-</html>
+{% block content %}
+  <h2>Welcome, {{username}}!</h2>
+{% endblock %}

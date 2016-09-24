@@ -1,0 +1,1 @@
+web: dev_appserver.py --port $PORT .
