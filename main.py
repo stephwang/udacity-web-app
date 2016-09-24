@@ -19,7 +19,7 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
-class MainPage(webapp2.RequestHandler):
+class MainPage(Handler):
     def get(self):
         self.render('signup.html')
         
@@ -50,13 +50,25 @@ class MainPage(webapp2.RequestHandler):
         else:
             self.redirect('/welcome?username=' + username)
 
-class WelcomeHandler(webapp2.RequestHandler):
+class WelcomeHandler(Handler):
     def get(self):
         params = dict(username = self.request.get('username'))
         self.render("welcome.html", **params)
 
+class FizzBuzzHandler(Handler):
+    def get(self):
+        n = self.request.get('n')
+        if n and n.isdigit():
+            n = int(n)
+        else:
+            n = None
+        params = dict(n = n)
+        self.render("fizzbuzz.html", **params)
+
 app = webapp2.WSGIApplication([
-    ('/', MainPage), ('/welcome', WelcomeHandler)
+    ('/', MainPage), 
+    ('/welcome', WelcomeHandler),
+    ('/fizzbuzz', FizzBuzzHandler)
 ], debug=True)
 
 def valid_username(username):
