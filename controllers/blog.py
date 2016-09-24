@@ -2,7 +2,7 @@ import webapp2
 import jinja2
 import os
 import re
-import models.posts as posts
+import models.posts
 
 from google.appengine.ext import db
 
@@ -59,24 +59,11 @@ class WelcomeHandler(Handler):
 
 class BlogHandler(Handler):
     def get(self):
-        posts = db.GqlQuery("SELECT * from Blogpost ORDER BY created desc LIMIT 10")
-        self.render("blog.html", posts=posts)
+        self.render("blog.html")
 
 class NewPostHandler(Handler):
     def get(self):
         self.render("newpost.html")
-    
-    def post(self):
-        subject = self.request.get('subject')
-        content = self.request.get('content')
-        if subject and content:
-            b = posts.Blogpost(title=subject, contents=content)
-            b.put()
-            
-            self.redirect("/blog")
-        else:
-            error = "both title and contents are required!"
-            self.render("newpost.html", subject=subject, content=content, error=error)
 
 class AsciiHandler(Handler):
     def render_front(self, title="", art="", error=""):
@@ -91,21 +78,13 @@ class AsciiHandler(Handler):
         art = self.request.get("art")
         
         if title and art:
-            a = posts.Art(title=title, art=art)
+            a = Art(title=title, art=art)
             a.put()
             
             self.redirect("/ascii")
         else:
             error = "we need both a title and some artwork!"
             self.render_front(title=title, art=art, error=error)
-
-app = webapp2.WSGIApplication([
-    ('/', MainPage), 
-    ('/welcome', WelcomeHandler),
-    ('/ascii', AsciiHandler),
-    ('/blog', BlogHandler),
-    ('/blog/newpost', NewPostHandler)
-], debug=True)
 
 def valid_username(username):
     USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")

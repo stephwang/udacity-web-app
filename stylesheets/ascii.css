@@ -1,0 +1,21 @@
+hr{
+    margin: 20px auto;
+}
+
+textarea {
+    font-family: monospace;
+}
+
+.art + .art {
+    margin-top: 20px;
+}
+
+.art-title {
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.art-body {
+    margin: 0;
+    font-size: 17px;
+}
