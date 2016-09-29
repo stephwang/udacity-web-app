@@ -9,6 +9,7 @@ import hashlib
 import hmac
 import json
 import time
+import logging
 
 import models.posts as posts
 import models.users as users
@@ -191,13 +192,18 @@ class NewPostHandler(Handler):
         if subject and content:
             b = posts.Blogpost(title=subject, contents=content)
             b.put()
-            get_posts(True)
             
+            get_posts(True)
             self.redirect("/blog/%s" % str(b.key().id()))
 
         else:
             error = "both title and contents are required!"
             self.render("newpost.html", subject=subject, content=content, error=error)
+
+class MemcacheFlushHandler(Handler):
+    def get(self):
+        memcache.flush_all()
+        self.redirect("/blog")
 
 class AsciiHandler(Handler):
     def render_front(self, title="", art="", error=""):
@@ -222,14 +228,15 @@ class AsciiHandler(Handler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPageHandler),
-    ('/signup', SignupHandler), 
-    ('/login', LoginHandler),
-    ('/logout', LogoutHandler),
+    ('/blog/signup', SignupHandler), 
+    ('/blog/login', LoginHandler),
+    ('/blog/logout', LogoutHandler),
     ('/welcome', WelcomeHandler),
     ('/ascii', AsciiHandler),
     ('/blog/?(?:\.json)?', BlogHandler),
     ('/blog/([0-9]+)(?:\.json)?', PostPageHandler),
-    ('/blog/newpost', NewPostHandler)
+    ('/blog/newpost', NewPostHandler),
+    ('/blog/flush', MemcacheFlushHandler)
 ], debug=True)
 
 def valid_username(username):
