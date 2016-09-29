@@ -7,10 +7,13 @@ import random
 import string
 import hashlib
 import hmac
+import json
+import time
 
 import models.posts as posts
 import models.users as users
 
+from google.appengine.api import memcache
 from google.appengine.ext import db
 
 SECRET = 'supersecret'
@@ -32,9 +35,9 @@ class Handler(webapp2.RequestHandler):
 
 class MainPageHandler(Handler):
     def get(self):
-        u = db.GqlQuery("select * from User")
-        for user in u:
-            user.delete()
+        #p = db.GqlQuery("select * from Blogpost")
+        #for post in p:
+        #    post.delete()
         self.response.out.write('hello!')
 
 class SignupHandler(Handler):
@@ -138,18 +141,45 @@ class WelcomeHandler(Handler):
 
 class BlogHandler(Handler):
     def get(self):
-        posts = db.GqlQuery("SELECT * from Blogpost ORDER BY created desc LIMIT 10")
-        self.render("blog.html", posts=posts)
+        posts = get_posts()
+        time_since_last_update = int(time.time())-memcache.get('last_update')
+        
+        if self.request.url.endswith('.json'):
+            p = []
+            for post in posts:
+                p.append({'subject': post.title,
+                    'content':post.contents, 
+                    'created': post.created.strftime('%c')
+                })
+            self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+            self.write(json.dumps(p))
+        else:
+            self.render("blog.html", posts=posts, time_since_last_update=time_since_last_update)
 
 class PostPageHandler(BlogHandler):
     def get(self, post_id):
-        post = posts.Blogpost.get_by_id(int(post_id))
+        post_query_key = post_id + '_query_time'
+        post = memcache.get(post_id)
+        
+        if not post:
+            post = posts.Blogpost.get_by_id(int(post_id))
+            memcache.set(post_id, post)
+            memcache.set(post_query_key, int(time.time()))
         
         if not post:
             self.error(404)
             return
         
-        self.render("permalink.html", post=post)
+        if self.request.url.endswith('.json'):
+            p= {'subject': post.title,
+                'content':post.contents, 
+                'created': post.created.strftime('%c')
+            }
+            self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+            self.write(json.dumps(p))
+        else:
+            post_last_queried = int(time.time()-memcache.get(post_query_key))
+            self.render("permalink.html", post=post, post_last_queried=post_last_queried)
 
 class NewPostHandler(Handler):
     def get(self):
@@ -161,8 +191,10 @@ class NewPostHandler(Handler):
         if subject and content:
             b = posts.Blogpost(title=subject, contents=content)
             b.put()
+            get_posts(True)
             
             self.redirect("/blog/%s" % str(b.key().id()))
+
         else:
             error = "both title and contents are required!"
             self.render("newpost.html", subject=subject, content=content, error=error)
@@ -195,8 +227,8 @@ app = webapp2.WSGIApplication([
     ('/logout', LogoutHandler),
     ('/welcome', WelcomeHandler),
     ('/ascii', AsciiHandler),
-    ('/blog', BlogHandler),
-    ('/blog/([0-9]+)', PostPageHandler),
+    ('/blog/?(?:\.json)?', BlogHandler),
+    ('/blog/([0-9]+)(?:\.json)?', PostPageHandler),
     ('/blog/newpost', NewPostHandler)
 ], debug=True)
 
@@ -223,3 +255,15 @@ def make_pw_hash(name, password, salt=""):
 
 def hash_user(username):
     return hmac.new(SECRET, username).hexdigest()
+    
+def get_posts(update=False):
+    key = 'posts'
+    posts = memcache.get(key)
+    
+    if posts is None or update:
+        posts = db.GqlQuery("SELECT * from Blogpost ORDER BY created desc LIMIT 10")
+        memcache.set('last_update', int(time.time()))
+    
+    posts = list(posts)
+    memcache.set(key, posts)
+    return posts

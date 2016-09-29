@@ -7,4 +7,7 @@
     <div class="post-contents">{{post.render() | safe}}</div>
     <div class="post-time">posted on {{post.created.date()}}</div>
 </div>
+<div>
+    Queried {{post_last_queried}} seconds ago
+</div>
 {% endblock %}

@@ -1,4 +1,4 @@
-header {
+#header {
     height: 50px;
     background-color: #ccc;
     margin: 0px;
@@ -9,6 +9,7 @@ header {
 body{
     font-family: sans-serif;
     margin: 0 auto;
+    width: 700px;
 }
 
 .error {
