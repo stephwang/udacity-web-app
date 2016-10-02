@@ -36,7 +36,7 @@ class EditPageHandler(Handler):
     def post(self, title):
         content = self.request.get('content')
         if content:
-            query.post_article(title=title, content=content)
+            p = query.post_article(title=title, content=content)
             self.redirect("%s" % title)
         else:
             error = "contents are required!"

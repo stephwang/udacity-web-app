@@ -1,4 +1,5 @@
 import logging
+import time
 
 from google.appengine.api import memcache
 from google.appengine.ext import db
@@ -7,25 +8,22 @@ from models.article import Article
 from models.user import User
 import lib.utils as utils
 
-def get_article_all_versions(title, update=False):
-    logging.error(title)
-    key = title
-    curr_article = memcache.get(key)
-    
-    # not in memcache, query db
-    if curr_article is None or update == True:
+def get_article_all_versions(title):
+    curr_article = memcache.get(title)
+
+    if curr_article is None:
         logging.error("DB QUERY BEING RUN")
         curr_article = db.GqlQuery("SELECT * FROM Article " 
-                                    + "WHERE path='" + title + "'" 
-                                    + " ORDER BY created asc").fetch(None)
-        logging.error("curr_article = %s" % curr_article)
+                                    "WHERE path= :1" 
+                                    " ORDER BY created asc", title)
+        curr_article = list(curr_article)
         
         # not in db
         if not curr_article:
-            memcache.set(key, [])
+            memcache.set(title, [])
         # found in db
         else:
-            memcache.set(key, curr_article)
+            memcache.set(title, curr_article)
 
     return curr_article
 
@@ -44,11 +42,14 @@ def post_article(title, content):
     logging.error("DB QUERY BEING RUN")
     
     b = Article(path=title, content=content)
-    b.put()
-    logging.error("posting article: %s" % b)
-    get_article_all_versions(title, True)
+    key = b.put()
+    
+    # update memcache
+    m = memcache.get(title)
+    m.append(b)
+    memcache.set(title, m)
         
-    return True
+    return b
     
 def get_user(username, update=False):
     logging.error("DB QUERY BEING RUN")
