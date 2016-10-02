@@ -12,17 +12,21 @@ import logging
 
 class WikiPageHandler(Handler):
     def get(self, title):
-        article = query.get_article(title)
+        v = self.request.get('v')
+        article = query.get_article(title, v)
+
         if article:
-            content = article.render()
+            logging.error(article.content)
+            content = article.content
             self.render('article.html', title=title, content=content)
         else:
             self.redirect('/_edit%s' % title)
 
 class EditPageHandler(Handler):
     def get(self, title, content='', error=''):
+        v = self.request.get('v')
         if self.user:
-            article = query.get_article(title)
+            article = query.get_article(title, v)
             if article:
                 content = article.content
             self.render("edit_article.html", title=title, content=content, error=error)
@@ -38,6 +42,10 @@ class EditPageHandler(Handler):
             error = "contents are required!"
             self.render("edit_article.html", title=title, content=content, error=error)
 
+class HistoryPageHandler(Handler):
+    def get(self, title):
+        history = query.get_article_all_versions(title)
+        self.render("history.html", title=title, history=history)
 
 class SignupHandler(Handler):
     def get(self):
@@ -68,7 +76,7 @@ class SignupHandler(Handler):
         
         # check if user exists already
         u = query.get_user(username)
-        if u.get():
+        if u:
             params['username_error'] = "User already exists"
             errors += 1
         
@@ -103,28 +111,3 @@ class LogoutHandler(Handler):
     def get(self):
         self.logout()
         self.redirect('/login')
-
-# class HistoryPageHandler(BlogHandler):
-#     def get(self):
-#         post_query_key = post_id + '_query_time'
-#         post = memcache.get(post_id)
-        
-#         if not post:
-#             post = posts.Blogpost.get_by_id(int(post_id))
-#             memcache.set(post_id, post)
-#             memcache.set(post_query_key, int(time.time()))
-        
-#         if not post:
-#             self.error(404)
-#             return
-        
-#         if self.request.url.endswith('.json'):
-#             p= {'subject': post.title,
-#                 'content':post.contents, 
-#                 'created': post.created.strftime('%c')
-#             }
-#             self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
-#             self.write(json.dumps(p))
-#         else:
-#             post_last_queried = int(time.time()-memcache.get(post_query_key))
-#             self.render("permalink.html", post=post, post_last_queried=post_last_queried)

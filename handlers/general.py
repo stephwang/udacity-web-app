@@ -19,7 +19,7 @@ class Handler(webapp2.RequestHandler):
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
-        #params['user'] = self.user
+        params['user'] = self.user
         return render_str(template, **params)
 
     def render(self, template, **kw):

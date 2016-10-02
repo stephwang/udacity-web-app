@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <div class="article-actions">
+    {% if user %}
+        <a href="{{title}}">view</a> | 
+    {% endif %}
+        <a href="/_edit{{title}}">edit</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div id="article-history">
+    {% for article in history %}
+        <div class="history-item">
+            {{article.created.strftime('%x %X')}} | {{article.content}}
+            <a href="/_edit{{title}}?v={{history.index(article) + 1}}">edit</a> | 
+            <a href="{{title}}?v={{history.index(article) + 1}}">view</a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

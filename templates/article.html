@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 
+{% block header %}
+    <div class="article-actions">
+    {% if user %}
+        <a href="/_edit{{title}}">edit</a> | 
+    {% endif %}
+        <a href="/_history{{title}}">history</a>
+    </div>
+{% endblock %}
+
 {% block content %}
 <div id="article-content">
     {{content | safe}}

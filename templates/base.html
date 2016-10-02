@@ -8,13 +8,18 @@
     
     <body>
         <header id="header">
-            <div class="article-actions">
-                <a href="/_edit{{title}}">edit</a> | <a href="/_history{{title}}">history</a>
-            </div>
+            {% block header %}
+            {% endblock %}
+
             <div class="auth-actions">
-                <a href="/login">login</a>
+            {% if user %}
+                {{user.username}} | <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/login">Log in</a> | <a href="/signup">Sign up</a>
+            {% endif %}
             </div>
         </header>
+        
         {% block content %}
         {% endblock %}
     </body>

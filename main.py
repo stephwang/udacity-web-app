@@ -8,6 +8,6 @@ app = webapp2.WSGIApplication([
     ('/login', wiki.LoginHandler),
     ('/logout', wiki.LogoutHandler),
     ('/_edit' + PAGE_RE, wiki.EditPageHandler),
-    #('/_history' + PAGE_RE, wiki.HistoryPageHandler),
+    ('/_history' + PAGE_RE, wiki.HistoryPageHandler),
     (PAGE_RE, wiki.WikiPageHandler)
 ], debug=True)
