@@ -2,13 +2,18 @@
 
 <html>
     <head>
-        <title>Base Template!</title>
+        <title>Steph's Wiki</title>
         <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
     </head>
     
     <body>
         <header id="header">
-            Header from template
+            <div class="article-actions">
+                <a href="/_edit{{title}}">edit</a> | <a href="/_history{{title}}">history</a>
+            </div>
+            <div class="auth-actions">
+                <a href="/login">login</a>
+            </div>
         </header>
         {% block content %}
         {% endblock %}
