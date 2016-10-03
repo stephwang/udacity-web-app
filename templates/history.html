@@ -10,11 +10,14 @@
 {% endblock %}
 
 {% block content %}
+<h1>History for {{title}}</h1>
 <div id="article-history">
     {% for article in history %}
         <div class="history-item">
             {{article.created.strftime('%x %X')}} | {{article.content}}
+            {% if user %}
             <a href="/_edit{{title}}?v={{history.index(article) + 1}}">edit</a> | 
+            {% endif %}
             <a href="{{title}}?v={{history.index(article) + 1}}">view</a>
         </div>
     {% endfor %}

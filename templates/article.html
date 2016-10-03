@@ -3,13 +3,14 @@
 {% block header %}
     <div class="article-actions">
     {% if user %}
-        <a href="/_edit{{title}}">edit</a> | 
+        <a href="/_edit{{title}}">Edit</a> | 
     {% endif %}
-        <a href="/_history{{title}}">history</a>
+        <a href="/_history{{title}}">History</a>
     </div>
 {% endblock %}
 
 {% block content %}
+<h1>{{title}}</h1>
 <div id="article-content">
     {{content | safe}}
 </div>

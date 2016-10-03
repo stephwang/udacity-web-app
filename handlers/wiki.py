@@ -1,14 +1,6 @@
-import json
-import time
-from google.appengine.api import memcache
-
-
 from lib import utils
 from handlers.general import Handler
-from models.user import User
 import lib.db_queries as query
-
-import logging
 
 class WikiPageHandler(Handler):
     def get(self, title):
@@ -16,7 +8,6 @@ class WikiPageHandler(Handler):
         article = query.get_article(title, v)
 
         if article:
-            logging.error(article.content)
             content = article.content
             self.render('article.html', title=title, content=content)
         else:
@@ -36,7 +27,7 @@ class EditPageHandler(Handler):
     def post(self, title):
         content = self.request.get('content')
         if content:
-            p = query.post_article(title=title, content=content)
+            query.post_article(title=title, content=content)
             self.redirect("%s" % title)
         else:
             error = "contents are required!"

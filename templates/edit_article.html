@@ -10,14 +10,11 @@
 {% endblock %}
 
 {% block content %}
-<form method="post">
-    <h2>Edit Article</h2>
-    <label>
-        <div>contents</div>
+    <h1>Edit Article</h1>
+    <h2>{{title}}</h2>
+    <form method="post">
         <textarea name="content">{{content}}</textarea>
-    </label>
-    
-    <div class="error">{{error}}</div>
-    <input type="submit">
-</form>
+        <div class="error">{{error}}</div>
+        <input type="submit">
+    </form>
 {% endblock %}
